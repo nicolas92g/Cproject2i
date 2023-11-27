@@ -8,3 +8,5 @@ git clone --recurse-submodules https://github.com/nicolas92g/Cproject2i
 
 ```
 
+```bash
+git submodule update --remote
