@@ -1,5 +1,7 @@
 #pragma once
 #include <Renderer.h>
+#include "MeshesLoader.h"
+#include "Game.h"
 
 typedef struct MainApplication
 {
@@ -7,10 +9,8 @@ typedef struct MainApplication
 	Camera camera;
 	Renderer renderer;
 
-	Renderer2d r2d;
-	Mesh mesh;
-	Object3d obj;
-
+	MeshesLoader meshes;
+	Game game;
 
 }MainApplication;
 
