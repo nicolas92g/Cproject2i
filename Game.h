@@ -12,8 +12,13 @@ typedef struct Game
 	int isStarted;
 	double startTime;
 	unsigned score;
+	vec4 virtualCamPos;
+	double shipSpeed;
+	char shipOrbit; // -1, 0, or 1
+
 	Object3d earth;
 	Object3d ship;
+	Object3d satellite;
 }Game;
 
 void GameCreate(Game* self, Renderer* renderer, MeshesLoader* meshes);
