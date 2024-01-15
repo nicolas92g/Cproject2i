@@ -5,17 +5,24 @@ void interface2dCreate(Interface2d* self, Window* window, Camera* camera)
 {
 	self->camera = camera;
 	self->window = window;
-	Renderer2dCreate(&self->r2d, self->window);
+	
 	self->isMenuOn = 1;
+	self->actualScore = 0;
+
+	Renderer2dCreate(&self->r2d, self->window);
 	
 }
 
+
 void interface2dObjectAdd(Interface2d* self)
 {
-	Object2dDataCreate(&self->mainMenu, make_vec2(500, 300), make_vec2(1000, 600));
+	self->windowHeigt = WindowGetHeight(self->window);
+	self->windowWidth = WindowGetWidth(self->window);
 
-	Object2dDataCreate(&self->buttonStart, make_vec2(500, 400), make_vec2(375, 100));
-	Object2dDataCreate(&self->buttonClose, make_vec2(800, 50), make_vec2(175, 50));
+	Object2dDataCreate(&self->mainMenu, make_vec2((self->windowWidth)/2, (self->windowHeigt)/2), make_vec2(self->windowWidth, self->windowHeigt));
+
+	Object2dDataCreate(&self->buttonStart, make_vec2((self->windowWidth) / 2, (self->windowHeigt) / 2), make_vec2((self->windowWidth) * 0.35, (self->windowHeigt) * 0.15));
+	Object2dDataCreate(&self->buttonClose, make_vec2((self->windowWidth) * 0.90, 50), make_vec2(175, 50));
 
 	Object2dDataCreate(&self->buttonHistory, make_vec2(500, 100), make_vec2(300, 75));
 	Object2dDataCreate(&self->buttonClear, make_vec2(300, 50), make_vec2(175, 50));
@@ -26,6 +33,7 @@ void interface2dObjectAdd(Interface2d* self)
 
 	
 }
+
 
 void interface2dFrame(Interface2d* self)
 {
@@ -51,14 +59,18 @@ void interface2dFrame(Interface2d* self)
 	}
 }
 
+
+
 void interface2dMenuOn(Interface2d* self)
 {
 	Renderer2dUpdate(&self->r2d);
 
-	Renderer2dColor(&self->r2d, make_vec4(.5f, .5f, .5f, .8f), &self->mainMenu);
+	Renderer2dColor(&self->r2d, make_vec4(.5f, .5f, .4f, 1), &self->mainMenu);
 
-	Renderer2dText(&self->r2d, "Best Score :" , 300, 200, 40);
-	Renderer2dText(&self->r2d, "Average Score :", 600, 200, 40);
+
+	Renderer2dText(&self->r2d, "Best Score :" , 300, 200, self->windowHeigt * 0.07);
+	Renderer2dText(&self->r2d, "Average Score :", 600, 200, self->windowHeigt * 0.07);
+
 
 	if (Renderer2dColorButton(&self->r2d, "Commencer", ButtonColor(make_vec4f(1)), &self->buttonStart))
 	{
@@ -79,12 +91,19 @@ void interface2dMenuOn(Interface2d* self)
 	}
 }
 
+
+
 void interface2dMenuOFF(Interface2d* self)
 {
 	CameraBasicControls(self->camera, .005f, 2, 10);
 
-	Renderer2dText(&self->r2d, "Actual Score", 10, 10, 50);
+	self->actualScore += 1;
+
+	sprintf_s(self->buffer, 200, "Actual Score : %d", self->actualScore);
+	Renderer2dText(&self->r2d, self->buffer, 10, 10, 50);
 }
+
+
 
 void Renderer2dHistory(Interface2d* self)
 {
@@ -92,7 +111,8 @@ void Renderer2dHistory(Interface2d* self)
 
 	Renderer2dColor(&self->r2d, make_vec4(.5f, .5f, .5f, .8f), &self->mainMenu);
 
-	Renderer2dText(&self->r2d, "Hystorique", 500, 400, 40);
+	//sprintf_s(self->buffer, 200, "Game 1 : %d", 200);
+	//Renderer2dText(&self->r2d, self->buffer, 500, 400, 40);
 
 	if (Renderer2dColorButton(&self->r2d, "Retour", ButtonColor(make_vec4f(1)), &self->buttonBack))
 	{
@@ -106,6 +126,7 @@ void Renderer2dHistory(Interface2d* self)
 		Rendere2dClearHistory(self);
 	}
 }
+
 
 void Rendere2dClearHistory(Interface2d* self)
 {

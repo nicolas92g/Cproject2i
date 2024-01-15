@@ -19,9 +19,14 @@ typedef struct Interface2d
 
 	Object2dData mainMenu;
 
-	Object2dData actualScore;
+	//Object2dData affichageActualScore;
 
+	char buffer[200];
 	int isMenuOn;
+	int windowHeigt;
+	int windowWidth;
+
+	int actualScore;
 
 }Interface2d;
 
