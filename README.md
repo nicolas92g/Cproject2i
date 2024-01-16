@@ -17,7 +17,7 @@ git clone --recurse-submodules https://github.com/nicolas92g/Cproject2i
 <h3>pull new Renderer versions with :</h3>
 
 ```bash
-
+ 
 git submodule update --remote
 
 ```
@@ -30,4 +30,5 @@ git submodule update --remote
     <li>freetype 2</li>
     <li>stb_image 2</li>
     <li>libmysql 6.1.11</li>
+    <li>libcurl with https support</li>
 </ul>
