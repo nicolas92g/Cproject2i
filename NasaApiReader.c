@@ -57,7 +57,7 @@ Texture NasaApiReaderGetTodayImage(NasaApiReader* self)
 
 	CURLcode res = curl_easy_perform(self->curl);
 
-	printf("|%s|\n", imgUrl);
+	//printf("|%s|\n", imgUrl);
 
 	if (res != CURLE_OK) {
 		return (Texture) { 0, 0, 0, 0 };
@@ -72,11 +72,13 @@ Texture NasaApiReaderGetTodayImage(NasaApiReader* self)
 	res = curl_easy_perform(self->curl);
 	curl_easy_cleanup(self->curl);
 
+	fclose(f);
+
 	if (res != CURLE_OK) {
 		return (Texture) { 0, 0, 0, 0 };
 	}
 
-	Texture texture;
-	TextureCreate(&texture, "apod.jpg");
-	return texture;
+	Texture ret;
+	TextureCreate(&ret, "apod.jpg");
+	return ret;
 }
