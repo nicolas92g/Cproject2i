@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable : 4996)
 #include "Renderer.h"
 #include "Game.h"
 
@@ -6,6 +7,8 @@
 #define HISTORIC_MENU 1
 #define GAME_MENU 2
 #define PAUSE_MENU 3
+#define END_MENU 4
+#define CONFIG_MENU 5
 
 
 typedef struct Interface2d
@@ -18,6 +21,7 @@ typedef struct Interface2d
 	Renderer renderer;
 
 	Object2dData mainMenu;
+	Object2dData button;
 
 	//Object2dData affichageActualScore;
 	
@@ -27,12 +31,13 @@ typedef struct Interface2d
 	int windowHeigt;
 	int windowWidth;
 
-	int actualScore;
+	int bestScore;
+	int avrScore;
 
 }Interface2d;
 
 
-void interface2dCreate(Interface2d* self, Window* window, Camera* camera);
+void interface2dCreate(Interface2d* self, Window* window, Camera* camera, Game* game);
 void interface2dObjectAdd(Interface2d* self);
 
 void interface2dFrame(Interface2d* self);
@@ -41,6 +46,8 @@ void interface2dMainMenu(Interface2d* self);
 void interface2dHistoricMenu(Interface2d* self);
 void interface2dGameMenu(Interface2d* self);
 void interface2dPauseMenu(Interface2d* self);
+void interface2dEndMenu(Interface2d* self);
+void interface2dConfigMenu(Interface2d* self);
 
 
 void Renderer2dHistory(Interface2d* self);
