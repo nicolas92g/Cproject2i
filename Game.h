@@ -1,6 +1,7 @@
 #pragma once
 #include <Renderer.h>
 #include "MeshesLoader.h"
+#include "Object3dHitbox.h"
 
 typedef struct Game
 {
@@ -17,8 +18,9 @@ typedef struct Game
 	char shipOrbit; // -1, 0, or 1
 
 	Object3d earth;
-	Object3d ship;
-	Object3d satellite;
+	Object3dHitbox ship;
+
+	Object3dHitbox satellite;
 }Game;
 
 void GameCreate(Game* self, Renderer* renderer, MeshesLoader* meshes);

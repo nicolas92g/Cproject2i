@@ -12,6 +12,9 @@ typedef struct MainApplication
 	MeshesLoader meshes;
 	Game game;
 
+	Renderer2d r2d;
+	Texture texture;
+
 }MainApplication;
 
 void MainApplicationCreate(MainApplication* app);
