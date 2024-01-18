@@ -79,6 +79,8 @@ Texture NasaApiReaderGetTodayImage(NasaApiReader* self)
 	}
 
 	Texture ret;
+	stbi_set_flip_vertically_on_load(0);
 	TextureCreate(&ret, "apod.jpg");
+	stbi_set_flip_vertically_on_load(1);
 	return ret;
 }
