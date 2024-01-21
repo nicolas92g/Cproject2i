@@ -3,6 +3,11 @@
 #include "MeshesLoader.h"
 #include "Object3dHitbox.h"
 
+typedef struct Satellite {
+	Object3dHitbox* pObj;
+	double launchTime;
+}Satellite;
+
 typedef struct Game
 {
 	Renderer* rendererPtr;
@@ -17,10 +22,16 @@ typedef struct Game
 	double shipSpeed;
 	char shipOrbit; // -1, 0, or 1
 
+	unsigned seed;
+	unsigned difficulty;
+
 	Object3d earth;
 	Object3dHitbox ship;
 
-	Object3dHitbox satellite;
+	Satellite* satellites;
+	size_t satellitesCount;
+	size_t satellitesReserve;
+
 }Game;
 
 void GameCreate(Game* self, Renderer* renderer, MeshesLoader* meshes);
