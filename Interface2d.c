@@ -1,13 +1,13 @@
 #include "Interface2d.h"
 
 
-int addBestScore(int nScore) {
+int newSave(int score) {
 	FILE* file;
 	char buffer[100];
 
-	sprintf_s(buffer, 100, "Best Score : %d", nScore);
+	sprintf_s(buffer, 100, "SaveScore=%d", score);
 
-	file = fopen( "save/bestScore.txt", "w+");
+	file = fopen( "save/save.txt", "w+");
 	if (file == NULL) {
 		printf("error1");
 		return 0;
@@ -19,17 +19,17 @@ int addBestScore(int nScore) {
 
 }
 
-int recoverBestScore() {
+int recoverSave() {
 	FILE* file;
 	int score = 0;
 
-	file = fopen( "save/bestScore.txt", "r");
+	file = fopen( "save/save.txt", "r");
 	if (file == NULL) {
 		printf("error2");
 		return 0;
 	}
 	
-	fscanf_s(file, "Best Score : %d", &score);
+	fscanf_s(file, "SaveScore=%d", &score);
 
 	fclose(file);
 	return score;
@@ -47,8 +47,9 @@ void interface2dCreate(Interface2d* self, Window* window, Camera* camera, Game* 
 	self->window = window;
 	self->game = game;
 
-	self->currentMenu = 0;
-	self->bestScore = recoverBestScore();
+	self->currentMenu = MAIN_MENU;
+	self->saveScore = recoverSave();
+	self->bestScore = 0;
 	
 	Renderer2dCreate(&self->r2d, self->window);
 	
@@ -119,18 +120,38 @@ void interface2dMainMenu(Interface2d* self)
 	Renderer2dText(&self->r2d, "Average Score :", self->windowWidth / 1.75, self->windowHeigt / 4, self->windowHeigt * 0.05);
 
 	
-	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, (self->windowHeigt) / 2), make_vec2((self->windowWidth) * 0.35, (self->windowHeigt) * 0.15));
-	if (Renderer2dColorButton(&self->r2d, "Start Game", ButtonColor(make_vec4f(1)), &self->button))
+	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, (self->windowHeigt) /1.35), make_vec2((self->windowWidth) * 0.45, (self->windowHeigt) * 0.15));
+	if (Renderer2dColorButton(&self->r2d, "Start New Game", ButtonColor(make_vec4f(1)), &self->button))
 	{
+		self->game->score = 0;
+		newSave(0);
+		GameStart(self->game);
+
 		printf("***Game Start***");
-		self->currentMenu = 2;
+		self->currentMenu = GAME_MENU;
 	}
+	
+	if (self->saveScore > 0)
+	{
+		Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, (self->windowHeigt) / 2), make_vec2((self->windowWidth) * 0.35, (self->windowHeigt) * 0.15));
+		if (Renderer2dColorButton(&self->r2d, "Continue", ButtonColor(make_vec4f(1)), &self->button))
+		{
+			self->game->score = self->saveScore;
+			GameStart(self->game);
+
+			printf("***Game Start***");
+			self->currentMenu = GAME_MENU;
+		}
+	}
+		
+	
+
 
 	Object2dDataCreate(& self->button, make_vec2(((self->windowWidth) / 2), ((self->windowHeigt) / 10)), make_vec2((self->windowWidth) * 0.3, (self->windowHeigt) * 0.1));
 	if (Renderer2dColorButton(&self->r2d, "Historical", ButtonColor(make_vec4f(1)), &self->button))
 	{
 		printf("***Hystorical***");
-		self->currentMenu = 1;
+		self->currentMenu = HISTORIC_MENU;
 	}
 
 	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) * 0.90, ((self->windowHeigt) / 10)), make_vec2((self->windowWidth) * 0.15, (self->windowHeigt) * 0.1));
@@ -159,7 +180,7 @@ void interface2dHistoricMenu(Interface2d* self)
 	if (Renderer2dColorButton(&self->r2d, "Retour", ButtonColor(make_vec4f(1)), &self->button))
 	{
 		printf("***Retour***");
-		self->currentMenu = 0;
+		self->currentMenu = MAIN_MENU;
 	}
 
 	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, ((self->windowHeigt) / 10)), make_vec2((self->windowWidth) * 0.15, (self->windowHeigt) * 0.1));
@@ -207,26 +228,53 @@ void interface2dPauseMenu(Interface2d* self)
 	if (Renderer2dColorButton(&self->r2d, "Continue", ButtonColor(make_vec4f(1)), &self->button))
 	{
 		printf("***Game Start***");
-		self->currentMenu = 2;
+		self->currentMenu = GAME_MENU;
 	}
 
 	Object2dDataCreate(&self->button, make_vec2(((self->windowWidth) / 2), ((self->windowHeigt) / 5)), make_vec2((self->windowWidth) * 0.3, (self->windowHeigt) * 0.1));
 	if (Renderer2dColorButton(&self->r2d, "Main Menu", ButtonColor(make_vec4f(1)), &self->button))
 	{
-		if (self->game->score > self->bestScore) {
-			addBestScore(self->game->score);
-			self->bestScore = self->game->score;
-		}
-		self->game->score = 0;
+		
+		newSave(self->game->score);
+		self->saveScore = self->game->score;
+
+		printf("\n%d", self->saveScore);
 
 		printf("***Main Menu***");
-		self->currentMenu = 0;
+		self->currentMenu = MAIN_MENU;
 	}
 }
 
 void interface2dEndMenu(Interface2d* self)
 {
+	Renderer2dUpdate(&self->r2d);
+	Renderer2dColor(&self->r2d, make_vec4(.5f, .5f, .5f, .8f), &self->mainMenu);
 
+	if (self->game->score > self->bestScore) {
+		
+		Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, ((self->windowHeigt) * 0.70)), make_vec2((self->windowWidth) * 0.35, (self->windowHeigt) * 0.1));
+		Renderer2dColorButton(&self->r2d, "NEW BEST SCORE !!!!!", ButtonColor(make_vec4f(1)), &self->button);
+	}
+
+	sprintf_s(self->buffer, 200, "Fianl score : %d", self->game->score);
+	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, ((self->windowHeigt) / 2)), make_vec2((self->windowWidth) * 0.35, (self->windowHeigt) * 0.1));
+	Renderer2dColorButton(&self->r2d, self->buffer, ButtonColor(make_vec4f(1)), &self->button);
+
+	Object2dDataCreate(&self->button, make_vec2(((self->windowWidth) / 2), ((self->windowHeigt) / 5)), make_vec2((self->windowWidth) * 0.3, (self->windowHeigt) * 0.1));
+	if (Renderer2dColorButton(&self->r2d, "Main Menu", ButtonColor(make_vec4f(1)), &self->button))
+	{
+		if (self->game->score > self->bestScore) {
+			//addBestScore(self->game->score);
+			self->bestScore = self->game->score;
+		}
+		self->game->score = 0;
+
+		self->saveScore = recoverSave();
+		newSave(0);
+		
+		printf("***Main Menu***");
+		self->currentMenu = MAIN_MENU;
+	}
 
 }
 
