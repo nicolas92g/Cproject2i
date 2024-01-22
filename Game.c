@@ -11,6 +11,8 @@
 #define CAM_RELATIVE_HEIGHT		15.f
 #define ORBITS_OFFSET			10.f
 
+#define GAME_SAVE_FORMAT	"%u;%lf"
+
 int KeyIsUp(Window* window, int *buffer, int GLFW_KEY) {
 	int ret = (*buffer && !WindowGetKey(window, GLFW_KEY));
 	*buffer = WindowGetKey(window, GLFW_KEY);
@@ -119,9 +121,8 @@ void GameFrame(Game* self)
 	if (!self->isStarted) return;
 	
 	//get time
-	static double t;
-	if (self->isStarted) t = glfwGetTime() - self->startTime;
-	self->score = (unsigned)(t * 100.); //score is time in cs
+	if (self->isStarted) self->t += self->windowPtr->deltaTime;
+	self->score = (unsigned)(self->t * 100.); //score is time in cs
 	
 	//earth
 	self->earth.rotationAngle += self->windowPtr->deltaTime * EARTH_SPEED;
@@ -138,9 +139,9 @@ void GameFrame(Game* self)
 	self->virtualCamPos.y = self->ship.obj.position.y;
 
 	//ship
-	self->shipSpeed = .1 + t / 500.0;
+	self->shipSpeed = .1 + self->t / 500.0;
 	Object3dHitboxUpdate(&self->ship);
-	trajectoryFunction(self->shipSpeed, t, &self->ship.obj.position);
+	trajectoryFunction(self->shipSpeed, self->t, &self->ship.obj.position);
 	self->ship.obj.rotationAxis = upVector;
 	self->ship.obj.rotationAngle = PI * -.5f;
 
@@ -173,7 +174,7 @@ void GameFrame(Game* self)
 	{
 		//trajectory
 		const double l = self->satellites[i].launchTime;
-		trajectoryFunction(self->shipSpeed, (l + 15) - (t - l) * 5, &self->satellites[i].pObj->obj.position);
+		trajectoryFunction(self->shipSpeed, (l + 15) - (self->t - l) * 5, &self->satellites[i].pObj->obj.position);
 		
 		//rotation
 		self->satellites[i].pObj->obj.rotationAngle += self->windowPtr->deltaTime * 4;
@@ -181,19 +182,19 @@ void GameFrame(Game* self)
 
 
 	char buf[100];
-	sprintf_s(buf, 100, "score = %lf\n", t);// self->score);
+	sprintf_s(buf, 100, "score = %lf\n", self->t);// self->score);
 
 	//remove satellites
-	if (self->satellitesCount > 0 && self->satellites[0].launchTime + 3 < t) {
+	if (self->satellitesCount > 0 && self->satellites[0].launchTime + 3 < self->t) {
 		removeFirstSatellite(self);
 	}
 	
 
 	//pseudo random add sats
 	static unsigned currentSecond = 0;
-	if (currentSecond != (unsigned)t && self->satellitesCount < 100 && t > 3) {
+	if (currentSecond != (unsigned)self->t && self->satellitesCount < 100 && self->t > 3 + self->importedTime) {
 
-		unsigned digest = hash((unsigned)t + self->seed);
+		unsigned digest = hash((unsigned)self->t + self->seed);
 
 		char bits[8];
 
@@ -215,7 +216,7 @@ void GameFrame(Game* self)
 			if (o && !orbits[o - 1]) {
 
 				Satellite sat;
-				sat.launchTime = t + bits[i + 4] / 20.;
+				sat.launchTime = self->t + bits[i + 4] / 20.;
 				sat.pObj = malloc(sizeof(Object3dHitbox));
 
 				//mesh selection (satellite or asteroid ?)
@@ -247,7 +248,7 @@ void GameFrame(Game* self)
 			}
 		}
 	}
-	currentSecond = (unsigned)t;
+	currentSecond = (unsigned)self->t;
 
 
 	//TO REMOVE !!!!!
@@ -258,17 +259,38 @@ void GameStart(Game* self)
 {
 	self->satellites = NULL;
 	self->isStarted = 1;
-	self->startTime = glfwGetTime();
 	self->score = 0;
 	self->shipSpeed = .1;
 	self->difficulty = 2;
 	self->shipOrbit = ORBIT_CENTER;
+	self->importedTime = 0;
 
 	self->ship.obj.position = make_vec4f(0.f);
 	self->virtualCamPos = make_vec4f(0.f);
 
 	srand(time(NULL) + (unsigned)(glfwGetTime() * 1000.));
-	self->seed = (unsigned)abs(rand());
+
+	FILE* save = fopen("GameSave.txt", "rb");
+	if (save) {
+		if (fscanf_s(save, GAME_SAVE_FORMAT, &self->seed, &self->importedTime)){
+			self->t = max(0, self->importedTime - 3); // remove 3 seconds
+		}
+		else {
+			self->t = 0;
+			self->seed = (unsigned)abs(rand());
+		}
+		fclose(save);
+
+		FILE* remove = fopen("GameSave.txt", "wb");
+		if (remove) fclose(remove);
+	}
+	else {
+		self->seed = (unsigned)abs(rand());
+		self->t = 0;
+	}
+
+	printf("seed = %u", self->seed);
+	
 
 	self->satellitesReserve = 0;
 	self->satellitesCount = 0;
@@ -292,4 +314,24 @@ void GameStop(Game* self)
 
 	free(self->satellites);
 	self->satellitesReserve = 0;
+}
+
+void GameSave(Game* self)
+{
+	FILE* f = fopen("GameSave.txt", "wb");
+	if (!f) return;
+
+	fprintf(f, GAME_SAVE_FORMAT, self->seed, self->t);
+
+	fclose(f);
+}
+
+int GameIsSavedGameExists(){
+	FILE* f = fopen("GameSave.txt", "rb");
+	if (!f) return 0;
+	double lf;
+	unsigned u;
+	const int ret = fscanf_s(f, GAME_SAVE_FORMAT, &u, &lf);
+	fclose(f);
+	return ret;
 }
