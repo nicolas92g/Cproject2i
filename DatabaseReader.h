@@ -13,3 +13,6 @@ void DatabaseReaderDestroy(DatabaseReader* self);
 
 int DatabaseReaderAddGame(DatabaseReader* self, unsigned score);
 const GameModel* DatabaseReaderGetGames(DatabaseReader* self, unsigned* count);
+
+unsigned DatabaseReaderGetBestScore(DatabaseReader* self);
+double DatabaseReaderGetMeanScore(DatabaseReader* self);

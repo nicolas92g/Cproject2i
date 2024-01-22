@@ -72,3 +72,65 @@ const GameModel* DatabaseReaderGetGames(DatabaseReader* self, unsigned* count)
 
 	return buf;
 }
+
+unsigned DatabaseReaderGetBestScore(DatabaseReader* self)
+{
+	if (!self->isConnected) return 0;
+
+	if (mysql_query(self->connection, "SELECT MAX(score) FROM game WHERE score = (SELECT MAX(score) FROM game)")) {
+		printf("failed to read database !\n");
+		return 0;
+	}
+
+	MYSQL_RES* result = mysql_store_result(self->connection);
+
+	if (!result) {
+		printf("failed to store result from mysql\n");
+		return 0;
+	}
+
+	const int num_fields = mysql_num_fields(result);
+	if (num_fields < 1) return 0;
+
+	unsigned ret = 0;
+
+	MYSQL_ROW row;
+	while ((row = mysql_fetch_row(result)))
+	{
+		ret = atoi(row[0]);
+	}
+
+	mysql_free_result(result);
+
+	return ret;
+}
+double DatabaseReaderGetMeanScore(DatabaseReader* self)
+{
+	if (!self->isConnected) return 0.;
+
+	if (mysql_query(self->connection, "SELECT SUM(score) / COUNT(score) FROM game")) {
+		printf("failed to read database !\n");
+		return 0.;
+	}
+
+	MYSQL_RES* result = mysql_store_result(self->connection);
+
+	if (!result) {
+		printf("failed to store result from mysql\n");
+		return 0.;
+	}
+
+	const int num_fields = mysql_num_fields(result);
+	if (num_fields < 1) return 0.;
+
+	double ret = 0.;
+
+	MYSQL_ROW row;
+	while ((row = mysql_fetch_row(result)))
+	{
+		sscanf_s(row[0], "%lf", &ret);
+	}
+
+	mysql_free_result(result);
+	return ret;
+}
