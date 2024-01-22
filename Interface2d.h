@@ -32,9 +32,8 @@ typedef struct Interface2d
 	int windowHeigt;
 	int windowWidth;
 
-	int saveScore;
-	int bestScore;
-	int avrScore;
+	unsigned bestScore;
+	double avrScore;
 
 }Interface2d;
 

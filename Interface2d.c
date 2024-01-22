@@ -48,13 +48,14 @@ void interface2dCreate(Interface2d* self, Window* window, Camera* camera, Game* 
 	self->game = game;
 
 	self->currentMenu = MAIN_MENU;
-	self->saveScore = recoverSave();
-	self->bestScore = 0;
 	
 	Renderer2dCreate(&self->r2d, self->window);
 
+
 	DatabaseReaderCreate(&self->dbReader);
-	
+
+	self->bestScore = DatabaseReaderGetBestScore(&self->dbReader);
+	self->avrScore = DatabaseReaderGetMeanScore(&self->dbReader);
 }
 
 
@@ -116,10 +117,11 @@ void interface2dMainMenu(Interface2d* self)
 	Renderer2dColor(&self->r2d, make_vec4(.5f, .5f, .5f, .8f), &self->mainMenu);
 
 	
-	sprintf_s(self->buffer, 200, "Best Score : %d", self->bestScore);
+	sprintf_s(self->buffer, 200, "Best Score : %u", self->bestScore);
 	Renderer2dText(& self->r2d, self->buffer, self->windowWidth /6,self->windowHeigt / 4, self->windowHeigt * 0.05);
 
-	Renderer2dText(&self->r2d, "Average Score :", self->windowWidth / 1.75, self->windowHeigt / 4, self->windowHeigt * 0.05);
+	sprintf_s(self->buffer, 200, "Average Score : %.2lf", self->avrScore);
+	Renderer2dText(&self->r2d, self->buffer, self->windowWidth / 1.75, self->windowHeigt / 4, self->windowHeigt * 0.05);
 
 	
 	Object2dDataCreate(&self->button, make_vec2((self->windowWidth) / 2, (self->windowHeigt) /2), make_vec2((self->windowWidth) * 0.45, (self->windowHeigt) * 0.15));
@@ -167,7 +169,7 @@ void interface2dHistoricMenu(Interface2d* self)
 	const GameModel* games = DatabaseReaderGetGames(&self->dbReader, &gamesCount);
 
 	Renderer2dSetCenterPoint(&self->r2d, TOP_LEFT);
-	for (size_t i = 0; i < min(gamesCount,5); i++)
+	for (size_t i = gamesCount - 1; i >= max(gamesCount - 5,0) ; i--)
 	{
 		double fontSize = self->windowHeigt * 0.05;
 		sprintf_s(self->buffer, 200, "GAME %u | SCORE %u | DATE %s", games[i].id, games[i].score, games[i].datetime);
@@ -258,6 +260,9 @@ void interface2dEndMenu(Interface2d* self)
 	{
 
 		DatabaseReaderAddGame(&self->dbReader, self->game->score);
+		self->bestScore = DatabaseReaderGetBestScore(&self->dbReader);
+		self->avrScore = DatabaseReaderGetMeanScore(&self->dbReader);
+
 		GameStop(self->game);
 		
 		printf("***Main Menu***\n");
