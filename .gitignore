@@ -3,5 +3,6 @@ libs
 x64
 NasaApodApiKey.h
 apod.jpg
+save/save.txt
 GameSave.txt
 DatabaseLogin.h

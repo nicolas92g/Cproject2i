@@ -2,6 +2,7 @@
 #include <Renderer.h>
 #include "MeshesLoader.h"
 #include "Game.h"
+#include "Interface2d.h"
 
 typedef struct MainApplication
 {
@@ -14,6 +15,8 @@ typedef struct MainApplication
 
 	Renderer2d r2d;
 	Texture texture;
+
+	Interface2d interface2d;
 
 }MainApplication;
 

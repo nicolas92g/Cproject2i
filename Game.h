@@ -41,3 +41,4 @@ void GameStart(Game* self);
 void GameStop(Game* self);
 
 void GameSave(Game* self);
+int GameIsSavedGameExists();

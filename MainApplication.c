@@ -19,14 +19,16 @@ void loadingLoop(void* appVoidptr) {
 
 void frame(void* appVoidptr)
   {
-
 	MainApplication* app = (MainApplication*)appVoidptr;
 
-	GameFrame(&app->game);
 
-	//close window with escape
-	if (WindowGetKey(&app->window, GLFW_KEY_ESCAPE)) {
-		glfwSetWindowShouldClose(app->window.ptr, GLFW_TRUE);
+	//2d
+	interface2dObjectAdd(&app->interface2d);
+	interface2dFrame(&app->interface2d, &app->game);
+
+
+	if (app->interface2d.currentMenu == 2) {
+		GameFrame(&app->game);
 	}
 }
 
@@ -40,11 +42,14 @@ void MainApplicationCreate(MainApplication* app)
 	WindowSetBackgroundColor(.01, .01, .01, 1);
 	glfwSwapInterval(1);
 
-	//
+	//2d
+	interface2dCreate(&app->interface2d, &app->window, &app->camera, &app->game);
+
 	Renderer2dCreate(&app->r2d, &app->window);
 	NasaApiReader api;
 	NasaApiReaderCreate(&api);
 	//app->texture = NasaApiReaderGetTodayImage(&api);
+
 
 }
 
