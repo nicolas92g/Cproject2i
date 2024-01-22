@@ -16,12 +16,13 @@ typedef struct Game
 	MeshesLoader* meshesPtr;
 
 	int isStarted;
-	double startTime;
 	unsigned score;
 	vec4 virtualCamPos;
 	double shipSpeed;
 	char shipOrbit; // -1, 0, or 1
 
+	double t;
+	double importedTime;
 	unsigned seed;
 	unsigned difficulty;
 
@@ -38,3 +39,5 @@ void GameCreate(Game* self, Renderer* renderer, MeshesLoader* meshes);
 void GameFrame(Game* self);
 void GameStart(Game* self);
 void GameStop(Game* self);
+
+void GameSave(Game* self);
