@@ -2,6 +2,7 @@
 #pragma warning(disable : 4996)
 #include "Renderer.h"
 #include "Game.h"
+#include "DatabaseReader.h"
 
 #define MAIN_MENU 0
 #define HISTORIC_MENU 1
@@ -16,9 +17,9 @@ typedef struct Interface2d
 	Window* window;
 	Camera* camera;
 	Game* game;
+	DatabaseReader dbReader;
 
 	Renderer2d r2d;
-	Renderer renderer;
 
 	Object2dData mainMenu;
 	Object2dData button;
