@@ -1,4 +1,5 @@
 #include "DatabaseReader.h"
+#include "DatabaseLogin.h"
 
 #include <stdio.h>
 
@@ -14,7 +15,7 @@ void DatabaseReaderCreate(DatabaseReader* self) {
 		return;
 	}
 
-	if (!mysql_real_connect(self->connection, "localhost", "root", "esgi", "Cproject2i", 0, NULL, 0)) {
+	if (!mysql_real_connect(self->connection, "localhost", DATABASE_USER, DATABASE_PASSWORD, "Cproject2i", 0, NULL, 0)) {
 		printf("failed to connect to the database !\n");
 		self->isConnected = 0;
 		return;
@@ -28,6 +29,7 @@ void DatabaseReaderDestroy(DatabaseReader* self)
 
 int DatabaseReaderAddGame(DatabaseReader* self, unsigned score)
 {
+	if (!self->isConnected) return 0;
 	char buf[100];
 	sprintf_s(buf, 100, "INSERT INTO game(score, datetime) VALUES(%u, CURRENT_TIMESTAMP)", score);
 	return !mysql_query(self->connection, buf);
@@ -35,6 +37,8 @@ int DatabaseReaderAddGame(DatabaseReader* self, unsigned score)
 
 const GameModel* DatabaseReaderGetGames(DatabaseReader* self, unsigned* count)
 {
+	if (!self->isConnected) return NULL;
+
 	if (mysql_query(self->connection, "SELECT * FROM game LIMIT 1000")) {
 		printf("failed to read database !\n");
 		return NULL;
