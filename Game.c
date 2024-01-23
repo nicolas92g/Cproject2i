@@ -264,33 +264,28 @@ void GameStart(Game* self)
 	self->difficulty = 2;
 	self->shipOrbit = ORBIT_CENTER;
 	self->importedTime = 0;
+	self->seed = 0;
 
 	self->ship.obj.position = make_vec4f(0.f);
 	self->virtualCamPos = make_vec4f(0.f);
 
-	srand(time(NULL) + (unsigned)(glfwGetTime() * 1000.));
-
 	FILE* save = fopen("GameSave.txt", "rb");
+	int gameFromSave = 0;
 	if (save) {
-		if (fscanf_s(save, GAME_SAVE_FORMAT, &self->seed, &self->importedTime)){
+		if (fscanf_s(save, GAME_SAVE_FORMAT, &self->seed, &self->importedTime) == 2){
 			self->t = max(0, self->importedTime - 3); // remove 3 seconds
-		}
-		else {
-			self->t = 0;
-			self->seed = (unsigned)abs(rand());
+			gameFromSave = 1;
 		}
 		fclose(save);
 
 		FILE* remove = fopen("GameSave.txt", "wb");
 		if (remove) fclose(remove);
 	}
-	else {
-		self->seed = (unsigned)abs(rand());
-		self->t = 0;
-	}
 
-	printf("seed = %u", self->seed);
-	
+	if (!gameFromSave) {
+		self->t = 0.;
+		self->seed = hash(time(NULL) + (unsigned)(glfwGetTime() * 1000.));
+	}
 
 	self->satellitesReserve = 0;
 	self->satellitesCount = 0;
@@ -333,5 +328,5 @@ int GameIsSavedGameExists(){
 	unsigned u;
 	const int ret = fscanf_s(f, GAME_SAVE_FORMAT, &u, &lf);
 	fclose(f);
-	return ret;
+	return ret == 2;
 }

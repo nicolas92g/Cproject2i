@@ -62,6 +62,9 @@ const GameModel* DatabaseReaderGetGames(DatabaseReader* self, unsigned* count)
 	MYSQL_ROW row;
 	while ((row = mysql_fetch_row(result)))
 	{
+		if (!row[0]) return 0;
+		if (!row[1]) return 0;
+
 		buf[*count].id = atoi(row[0]);
 		buf[*count].score = atoi(row[1]);
 		strcpy_s(buf[*count].datetime, 50, row[2]);
@@ -97,6 +100,7 @@ unsigned DatabaseReaderGetBestScore(DatabaseReader* self)
 	MYSQL_ROW row;
 	while ((row = mysql_fetch_row(result)))
 	{
+		if (!row[0]) return 0;
 		ret = atoi(row[0]);
 	}
 
@@ -128,6 +132,7 @@ double DatabaseReaderGetMeanScore(DatabaseReader* self)
 	MYSQL_ROW row;
 	while ((row = mysql_fetch_row(result)))
 	{
+		if (!row[0]) return 0.;
 		sscanf_s(row[0], "%lf", &ret);
 	}
 

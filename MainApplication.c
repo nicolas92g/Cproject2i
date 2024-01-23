@@ -48,7 +48,7 @@ void MainApplicationCreate(MainApplication* app)
 	Renderer2dCreate(&app->r2d, &app->window);
 	NasaApiReader api;
 	NasaApiReaderCreate(&api);
-	//app->texture = NasaApiReaderGetTodayImage(&api);
+	app->texture = NasaApiReaderGetTodayImage(&api);
 
 
 }
@@ -61,7 +61,6 @@ void MainApplicationRun(MainApplication* app)
 	//load meshes
 	MeshesLoaderCreate(&app->meshes);
 	GameCreate(&app->game, &app->renderer, &app->meshes);
-	GameStart(&app->game);
 
 	//game loop
 	glfwSetWindowShouldClose(app->window.ptr, GLFW_FALSE);

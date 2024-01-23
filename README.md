@@ -3,6 +3,8 @@
 <p>
     This project is a small 3D game made with C and OpenGL.<br>
     This was developped on MSVC compiler of Visual Studio 2022 and not tested on any other environment.
+    To save the games, the game need a Mysql Database with the name 'Cproject2i' on localhost, database.sql is the
+    script to create this database
 </p>
 <br>
 <h2>
